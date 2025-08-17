@@ -1,0 +1,83 @@
+JavaScript Foundations (Resume Form Basics)
+
+🎓 Theory Learned
+1. Variables & Data Types (let, const)
+Definition: Variables store data values.
+let → block-scoped, can be reassigned.
+const → block-scoped, cannot be reassigned.
+Industry Use:
+Store API keys, user session tokens, or global state in a web app.
+Example: const API_KEY = "123xyz";
+Creative Use:
+A mood tracker app where each day’s mood is stored in a variable.
+Example: let todayMood = "productive";
+
+
+2. Conditionals & Loops
+Conditionals: if, else if, else, switch → used to check logical conditions.
+Loops: for, while, do...while → repeat code multiple times.
+Industry Use:
+Form Validation → checking if the email contains @.
+Dashboard Updates → running checks on data repeatedly.
+Creative Use:
+A study reminder app that runs a loop to check system time and triggers an alert at study hours.
+
+
+📝 Assignments Completed
+Pass/Fail Checker
+
+ let marks = 55;
+if (marks >= 40) {
+  console.log("Pass ✅");
+} else {
+  console.log("Fail ❌");
+}
+
+
+First 10 Even Numbers
+
+ for (let i = 1; i <= 10; i++) {
+  console.log(i * 2);
+}
+
+
+
+🏗️ Project Task – Resume Form
+Features Implemented:
+Fields: Name, Email, Skills
+Validation:
+Email must contain @
+Skills cannot be empty
+
+
+Sample Code:
+<form id="resumeForm">
+  <label>Name:</label>
+  <input type="text" id="name" required><br><br>
+
+  <label>Email:</label>
+  <input type="text" id="email" required><br><br>
+
+  <label>Skills:</label>
+  <input type="text" id="skills" required><br><br>
+
+  <button type="submit">Submit</button>
+</form>
+
+<script>
+  document.getElementById("resumeForm").addEventListener("submit", function(event) {
+    let email = document.getElementById("email").value;
+    let skills = document.getElementById("skills").value;
+
+    if (!email.includes("@")) {
+      alert("Invalid email: must include @");
+      event.preventDefault();
+    }
+
+    if (skills.trim() === "") {
+      alert("Skills field cannot be empty");
+      event.preventDefault();
+    }
+  });
+</script>
+
