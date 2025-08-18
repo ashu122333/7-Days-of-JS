@@ -1,0 +1,126 @@
+🎓 Theory
+
+🔹 Functions
+Definition: Functions are reusable blocks of code designed to perform a specific task.
+
+Types:
+
+Regular Function
+function greet(name) {
+  return `Hello, ${name}`;
+}
+
+
+Arrow Function
+const greet = (name) => `Hello, ${name}`;
+
+
+Industry Use Case:
+In React applications, utility functions help reduce duplication.
+Example: A date formatter function is reused across multiple components.
+
+const formatDate = (date) => new Date(date).toLocaleDateString();
+
+
+Creative Use Case:
+A study break suggestion generator:
+
+const randomBreak = () => {
+  const suggestions = ["Take a 5-min walk", "Stretch", "Drink water", "Listen to a song"];
+  return suggestions[Math.floor(Math.random() * suggestions.length)];
+};
+console.log(randomBreak());
+
+
+
+
+🔹 Arrays & Methods
+
+map() → transforms each element and returns a new array.
+filter() → filters elements based on a condition.
+reduce() → reduces an array to a single value.
+
+Examples
+// map example
+const skills = ["JS", "React", "CSS"];
+const skillList = skills.map(s => `Skill: ${s}`);
+console.log(skillList);
+
+// filter example
+const jobs = ["Software Engineer", "Data Analyst", "Civil Engineer"];
+const engineers = jobs.filter(job => job.includes("Engineer"));
+console.log(engineers);
+
+// reduce example
+const hours = [2, 3, 5, 1, 4];
+const total = hours.reduce((sum, h) => sum + h, 0);
+console.log(total);
+
+
+Industry Use Case: Filtering job listings by role/domain.
+
+Creative Use Case: Summing up your weekly study hours and displaying progress.
+
+
+
+📝 Assignments
+
+Average of Numbers
+
+const average = (arr) => arr.reduce((sum, num) => sum + num, 0) / arr.length;
+console.log(average([10, 20, 30])); // Output: 20
+
+
+
+Filter Job Roles
+const jobs = ["Software Engineer", "Data Analyst", "Civil Engineer", "Teacher"];
+const engineers = jobs.filter(job => job.includes("Engineer"));
+console.log(engineers); // ["Software Engineer", "Civil Engineer"]
+
+
+
+
+🏗️ Project Task – Add Skills Section to Resume Builder
+Feature: Allow user to enter multiple skills and display them using map().
+
+
+Example Code
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume Builder - Skills</title>
+</head>
+<body>
+  <h2>Skills Section</h2>
+  
+  <input type="text" id="skillInput" placeholder="Enter a skill">
+  <button onclick="addSkill()">Add Skill</button>
+
+  <ul id="skillsList"></ul>
+
+  <script>
+    let skills = [];
+
+    function addSkill() {
+      const input = document.getElementById("skillInput");
+      const skill = input.value.trim();
+      if (skill) {
+        skills.push(skill);
+        displaySkills();
+        input.value = "";
+      }
+    }
+
+    function displaySkills() {
+      const list = document.getElementById("skillsList");
+      list.innerHTML = skills.map(skill => `<li>${skill}</li>`).join("");
+    }
+  </script>
+</body>
+</html>
+
+
+✅ This integrates functions, arrays, and map() into your resume builder project.
