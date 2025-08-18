@@ -1,0 +1,96 @@
+Day 3 – Objects & Destructuring (Job Data Handling)
+==================================================
+
+THEORY
+------
+
+Objects
+-------
+Objects are key-value pairs used to store structured data.
+
+Example:
+---------
+const student = {
+  name: "Ashu",
+  age: 21,
+  grades: [85, 90, 88]
+};
+
+Accessing values:
+console.log(student.name);      // Ashu
+console.log(student["age"]);    // 21
+
+Industry Use (Storing user profiles):
+-------------------------------------
+const user = {
+  name: "Priya",
+  email: "priya@gmail.com",
+  skills: ["JavaScript", "React", "Node.js"]
+};
+
+Creative Use (AI “Study Persona”):
+----------------------------------
+const studyPersona = {
+  focusLevel: "High",
+  preferredTime: "Night",
+  strengths: ["Problem Solving", "Fast Learning"]
+};
+
+
+Destructuring & Spread Operator
+-------------------------------
+Destructuring: Quickly extract values from objects/arrays.
+
+const { name, age } = student;
+console.log(name, age);   // Ashu 21
+
+Spread Operator (...): Copy or merge objects/arrays.
+
+const obj1 = { a: 1, b: 2 };
+const obj2 = { c: 3 };
+const merged = { ...obj1, ...obj2 };
+
+console.log(merged);  // { a: 1, b: 2, c: 3 }
+
+Industry Use (Extract API response data):
+-----------------------------------------
+const response = { status: 200, data: { user: "Ashu", role: "Admin" } };
+const { data } = response;
+console.log(data.user);   // Ashu
+
+Creative Use (Merging two resumes):
+-----------------------------------
+const resume1 = { name: "Ashu", skills: ["JS", "React"] };
+const resume2 = { email: "ashu@gmail.com", skills: ["Node.js", "SQL"] };
+
+const megaResume = {
+  ...resume1,
+  ...resume2,
+  skills: [...resume1.skills, ...resume2.skills]
+};
+
+console.log(megaResume);
+// { name: "Ashu", skills: ["JS", "React", "Node.js", "SQL"], email: "ashu@gmail.com" }
+
+
+PROJECT TASK
+------------
+
+1. Store all resume data inside an object:
+
+const resume = {
+  name: "Ashu Gupta",
+  email: "ashu@example.com",
+  skills: ["JavaScript", "React", "Node.js"]
+};
+
+2. Use destructuring to neatly display resume details on the page:
+
+const { name, email, skills } = resume;
+
+document.body.innerHTML = `
+  <h2>Resume</h2>
+  <p><strong>Name:</strong> ${name}</p>
+  <p><strong>Email:</strong> ${email}</p>
+  <p><strong>Skills:</strong> ${skills.join(", ")}</p>
+`;
