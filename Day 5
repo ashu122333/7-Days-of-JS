@@ -1,0 +1,127 @@
+# 📅 Day 5 – Storage & Error Handling (Save Resume Drafts)
+
+## 🎓 Theory
+
+### 🗂️ localStorage
+- **Definition**: A built-in browser storage mechanism that stores key–value pairs persistently (data doesn’t disappear on reload/close).
+- **Key Methods**:
+  ```js
+  localStorage.setItem("key", "value");   // Save
+  localStorage.getItem("key");           // Retrieve
+  localStorage.removeItem("key");        // Delete
+  localStorage.clear();                  // Clear all
+👉 Industry Use: Saving user login state (e.g., keeping a user logged in even after refresh).
+
+# 💡 Creative Use: Auto-save today’s study plan or notes so they aren’t lost on refresh.
+
+# ⚠️ try/catch
+Definition: Error handling block in JavaScript to catch runtime errors without breaking the app.
+
+Syntax:
+
+js
+Copy
+Edit
+try {
+  // risky code
+} catch (error) {
+  console.error("Something went wrong:", error);
+}
+👉 Industry Use: Handling failed payment gateway request (e.g., Stripe/PayPal).
+
+💡 Creative Use: Show a “Fallback Study Task” if AI study planner API fails.
+
+📝 Assignments
+Store & Retrieve Name
+
+Save a user’s name in localStorage.
+
+Retrieve and display it after page reload.
+
+html
+Copy
+Edit
+<input id="username" placeholder="Enter your name">
+<button onclick="saveName()">Save</button>
+<p id="displayName"></p>
+
+<script>
+  function saveName() {
+    let name = document.getElementById("username").value;
+    localStorage.setItem("userName", name);
+    showName();
+  }
+
+  function showName() {
+    let name = localStorage.getItem("userName");
+    if (name) document.getElementById("displayName").innerText = "Welcome, " + name;
+  }
+
+  // Run on page load
+  showName();
+</script>
+Fetch with try/catch
+
+js
+Copy
+Edit
+async function getData() {
+  try {
+    let res = await fetch("https://jsonplaceholder.typicode.com/posts/1");
+    if (!res.ok) throw new Error("API request failed");
+    let data = await res.json();
+    console.log("Data:", data);
+  } catch (error) {
+    console.error("Error caught:", error.message);
+  }
+}
+getData();
+🏗️ Project Task
+Resume Builder Updates
+Save Draft with localStorage
+
+Save form fields (name, education, skills, etc.) into localStorage.
+
+Retrieve them when the page reloads so progress isn’t lost.
+
+js
+Copy
+Edit
+function saveDraft() {
+  let draft = {
+    name: document.getElementById("name").value,
+    education: document.getElementById("education").value,
+    skills: document.getElementById("skills").value
+  };
+  localStorage.setItem("resumeDraft", JSON.stringify(draft));
+}
+
+function loadDraft() {
+  let draft = JSON.parse(localStorage.getItem("resumeDraft"));
+  if (draft) {
+    document.getElementById("name").value = draft.name || "";
+    document.getElementById("education").value = draft.education || "";
+    document.getElementById("skills").value = draft.skills || "";
+  }
+}
+
+// Run on page load
+loadDraft();
+Custom Error Messages for API Failures
+
+Example: If job trends or AI cover letter API fails.
+
+js
+Copy
+Edit
+async function fetchJobTrends() {
+  try {
+    let res = await fetch("https://fake-api-for-trends.com");
+    if (!res.ok) throw new Error("API unavailable");
+    let data = await res.json();
+    console.log("Job Trends:", data);
+  } catch (error) {
+    document.getElementById("jobTrends").innerText =
+      "⚠️ Sorry! Unable to fetch job trends. Please try again later.";
+  }
+}
