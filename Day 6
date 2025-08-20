@@ -1,0 +1,140 @@
+ 📅 Day 6 – Voice & MCQs (AI Interview Prep)
+
+## 🎓 Theory
+
+### 🎤 Web Speech API
+- **Speech Recognition**: Converts voice → text.
+  ```js
+  const recognition = new window.webkitSpeechRecognition();
+  recognition.onresult = (event) => {
+    console.log("You said:", event.results[0][0].transcript);
+  };
+  recognition.start();
+Speech Synthesis: Converts text → voice.
+
+js
+Copy
+Edit
+const utterance = new SpeechSynthesisUtterance("Welcome to AI Interview");
+speechSynthesis.speak(utterance);
+👉 Industry Use: Alexa, Google Assistant.
+💡 Creative Use: A “study narrator” that reads notes aloud.
+
+⏱️ Timers
+setTimeout: Run once after delay.
+
+setInterval: Run repeatedly after interval.
+
+js
+Copy
+Edit
+setTimeout(() => console.log("Time’s up!"), 3000);
+
+let count = 5;
+let interval = setInterval(() => {
+  console.log("⏳", count--);
+  if (count < 0) clearInterval(interval);
+}, 1000);
+👉 Industry Use: Quiz countdown timer.
+💡 Creative Use: Pomodoro study timer.
+
+📝 Assignments
+Countdown from 10
+
+html
+Copy
+Edit
+<p id="timer"></p>
+<script>
+  let time = 10;
+  let timer = setInterval(() => {
+    document.getElementById("timer").innerText = time;
+    time--;
+    if (time < 0) {
+      clearInterval(timer);
+      document.getElementById("timer").innerText = "⏰ Time's up!";
+    }
+  }, 1000);
+</script>
+Speech Synthesis
+
+html
+Copy
+Edit
+<button onclick="sayWelcome()">Say Welcome</button>
+<script>
+  function sayWelcome() {
+    let msg = new SpeechSynthesisUtterance("Welcome to AI Interview");
+    speechSynthesis.speak(msg);
+  }
+</script>
+🏗️ Project Task
+1. Mock MCQ Quiz (with timer)
+html
+Copy
+Edit
+<body>
+  <h2>Mock Quiz</h2>
+  <p id="quizTimer"></p>
+  <form id="quizForm">
+    <p>1. What is React?</p>
+    <input type="radio" name="q1" value="framework"> Framework<br>
+    <input type="radio" name="q1" value="library"> Library<br>
+
+    <p>2. JS type of NaN?</p>
+    <input type="radio" name="q2" value="string"> String<br>
+    <input type="radio" name="q2" value="number"> Number<br>
+
+    <br>
+    <button type="button" onclick="submitQuiz()">Submit</button>
+  </form>
+  <p id="result"></p>
+
+  <script>
+    let timeLeft = 20;
+    let quizTimer = setInterval(() => {
+      document.getElementById("quizTimer").innerText = "⏳ Time: " + timeLeft;
+      timeLeft--;
+      if (timeLeft < 0) {
+        clearInterval(quizTimer);
+        submitQuiz();
+      }
+    }, 1000);
+
+    function submitQuiz() {
+      clearInterval(quizTimer);
+      let score = 0;
+      let form = document.getElementById("quizForm");
+      if (form.q1.value === "library") score++;
+      if (form.q2.value === "number") score++;
+      document.getElementById("result").innerText = "✅ Score: " + score + "/2";
+    }
+  </script>
+</body>
+2. AI Interview Section (Voice Q&A)
+html
+Copy
+Edit
+<body>
+  <h2>AI Interview</h2>
+  <button onclick="askQuestion()">🎙️ Ask Question</button>
+  <button onclick="captureAnswer()">🗣️ Capture Answer</button>
+  <p id="answer"></p>
+
+  <script>
+    function askQuestion() {
+      let question = "Tell me about yourself";
+      let msg = new SpeechSynthesisUtterance(question);
+      speechSynthesis.speak(msg);
+    }
+
+    function captureAnswer() {
+      let recognition = new window.webkitSpeechRecognition();
+      recognition.onresult = function(event) {
+        let transcript = event.results[0][0].transcript;
+        document.getElementById("answer").innerText = "You said: " + transcript;
+      };
+      recognition.start();
+    }
+  </script>
+</body>
