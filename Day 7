@@ -1,0 +1,556 @@
+Day 7 plan in JavaScript, with clean module structure, bite-size examples, and a minimal Next.js (App Router) scaffold you can paste in.
+
+Theory (JS-first)
+
+Modules & Clean Code (ESM)
+
+Named vs default exports
+
+// lib/math.js
+export const add = (a, b) => a + b;
+export default function clamp(n, min, max) { return Math.min(max, Math.max(min, n)); }
+
+// somewhere.js
+import clamp, { add } from "@/lib/math";
+
+
+Single Responsibility
+
+lib/ = pure logic (no DOM)
+
+components/ = UI only
+
+app/**/page.jsx = pages & wiring
+
+Barrel files
+
+// components/index.js
+export { ResumeForm } from "./resume/ResumeForm";
+export { Quiz } from "./quiz/Quiz";
+
+
+Side-effect free utils → makes testing easy
+
+Config-driven “plugin” pattern
+
+// lib/plugins.js
+const registry = [];
+export function registerPlugin(p){ registry.push(p); }
+export function getPlugins(){ return registry.slice(); }
+
+// sample plugin
+registerPlugin({
+  id: "spaced-repetition",
+  title: "Spaced Repetition",
+  run: (ctx) => {/* uses ctx.schedule, ctx.topics */},
+});
+
+
+Industry Use
+
+Feature folders in Next.js for maintainable growth.
+Creative Use
+
+“Study tools marketplace”: each study tool is a plugin registered at runtime.
+
+Assignments (JS)
+
+Export from one file, import in another
+
+// lib/greeter.js
+export function greet(name){ return `Hi, ${name}!`; }
+
+// app/hello/page.jsx
+"use client";
+import { greet } from "@/lib/greeter";
+export default function Page(){ return <p>{greet("Ashu")}</p>; }
+
+
+Split logic into separate files
+
+/lib/resume.js
+/lib/quiz.js
+/lib/jobs.js
+/lib/ai.js
+/lib/interview.js
+
+
+Each file holds pure functions; UI imports them.
+
+Final Project — Minimal Next.js App (App Router, JS)
+
+Folder map you can create:
+
+app/
+  layout.jsx
+  page.jsx
+  resume/page.jsx
+  cover-letter/page.jsx
+  study-planner/page.jsx
+  jobs/page.jsx
+  quiz/page.jsx
+  interview/page.jsx
+  dashboard/page.jsx
+api/
+  ai/route.js
+components/
+  resume/ResumeForm.jsx
+  quiz/Quiz.jsx
+  timer/Countdown.jsx
+lib/
+  storage.js
+  resume.js
+  ai.js
+  planner.js
+  jobs.js
+  quiz.js
+  interview.js
+
+1) Layout & Home
+// app/layout.jsx
+export const metadata = { title: "FYP Suite" };
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body style={{ fontFamily: "system-ui", maxWidth: 960, margin: "0 auto", padding: 16 }}>
+        <nav style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 16 }}>
+          {[
+            ["/", "Home"],
+            ["/resume", "Resume Builder"],
+            ["/cover-letter", "AI Cover Letter"],
+            ["/study-planner", "Study Planner"],
+            ["/jobs", "Job Trends"],
+            ["/quiz", "MCQ Test"],
+            ["/interview", "Voice Interview"],
+            ["/dashboard", "Analysis Dashboard"],
+          ].map(([href, label]) => <a key={href} href={href}>{label}</a>)}
+        </nav>
+        {children}
+      </body>
+    </html>
+  );
+}
+
+// app/page.jsx
+export default function Page(){
+  return <h1>Final Year Project Suite</h1>;
+}
+
+2) Shared storage helper
+// lib/storage.js
+export const saveJSON = (key, value) => {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(key, JSON.stringify(value));
+};
+export const loadJSON = (key, fallback = null) => {
+  if (typeof window === "undefined") return fallback;
+  try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
+  catch { return fallback; }
+};
+
+3) Resume Builder (+ Save Draft)
+// lib/resume.js
+export function computeCompleteness(resume){
+  if (!resume) return 0;
+  const fields = ["name","email","education","skills","projects","experience"];
+  const score = fields.reduce((acc,f)=> acc + (resume[f] && String(resume[f]).trim() ? 1 : 0), 0);
+  return Math.round((score / fields.length) * 100);
+}
+
+// components/resume/ResumeForm.jsx
+"use client";
+import { useEffect, useState } from "react";
+import { saveJSON, loadJSON } from "@/lib/storage";
+import { computeCompleteness } from "@/lib/resume";
+
+const KEY = "resume_draft";
+
+export function ResumeForm(){
+  const [form, setForm] = useState(()=> loadJSON(KEY, {
+    name:"", email:"", education:"", skills:"", projects:"", experience:""
+  }));
+  const completeness = computeCompleteness(form);
+
+  useEffect(()=> { saveJSON(KEY, form); }, [form]);
+
+  function update(e){
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  }
+
+  return (
+    <div style={{ display:"grid", gap:8 }}>
+      <h2>Resume Builder</h2>
+      <small>Completeness: {completeness}%</small>
+      {["name","email","education","skills","projects","experience"].map((f)=>(
+        <label key={f} style={{ display:"grid", gap:4 }}>
+          {f.toUpperCase()}
+          <textarea name={f} value={form[f]} onChange={update} rows={f==="skills"?2:3}/>
+        </label>
+      ))}
+      <button onClick={()=> alert("Draft saved!")}>Save Draft</button>
+    </div>
+  );
+}
+
+// app/resume/page.jsx
+import { ResumeForm } from "@/components/resume/ResumeForm";
+export default function Page(){ return <ResumeForm/>; }
+
+4) AI Cover Letter Generator (stub or swap with your API)
+// lib/ai.js
+export async function generateCoverLetter(prompt){
+  // Call your server route (keeps API keys server-side)
+  const res = await fetch("/api/ai", {
+    method:"POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt }),
+  });
+  const data = await res.json();
+  return data.text;
+}
+
+// app/api/ai/route.js
+export async function POST(req){
+  const { prompt } = await req.json();
+  // TODO: replace with real provider call
+  const text = `Mock Cover Letter for: ${prompt}\n\n(Integrate your AI here)`;
+  return Response.json({ text });
+}
+
+// app/cover-letter/page.jsx
+"use client";
+import { useState } from "react";
+import { generateCoverLetter } from "@/lib/ai";
+
+export default function Page(){
+  const [jd, setJd] = useState("");
+  const [out, setOut] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function run(){
+    setLoading(true);
+    const text = await generateCoverLetter(jd);
+    setOut(text);
+    setLoading(false);
+  }
+
+  return (
+    <div style={{ display:"grid", gap:8 }}>
+      <h2>AI Cover Letter</h2>
+      <textarea rows={6} value={jd} onChange={e=>setJd(e.target.value)} placeholder="Paste Job Description"/>
+      <button onClick={run} disabled={!jd || loading}>{loading?"Generating...":"Generate"}</button>
+      <pre style={{ whiteSpace:"pre-wrap" }}>{out}</pre>
+    </div>
+  );
+}
+
+5) AI Study Planner (dummy data or API)
+// lib/planner.js
+export function buildStudyPlan(topics, days=7){
+  const plan = [];
+  for (let d = 1; d <= days; d++){
+    plan.push({ day: d, focus: topics[(d-1) % topics.length], hours: 2 });
+  }
+  return plan;
+}
+
+// app/study-planner/page.jsx
+"use client";
+import { useState } from "react";
+import { buildStudyPlan } from "@/lib/planner";
+
+export default function Page(){
+  const [topics, setTopics] = useState("DSA, System Design, JS");
+  const [plan, setPlan] = useState([]);
+
+  function make(){
+    const list = topics.split(",").map(s=>s.trim()).filter(Boolean);
+    setPlan(buildStudyPlan(list, 7));
+  }
+
+  return (
+    <div style={{ display:"grid", gap:8 }}>
+      <h2>Study Planner</h2>
+      <input value={topics} onChange={e=>setTopics(e.target.value)} />
+      <button onClick={make}>Build Plan</button>
+      <ul>{plan.map(p=> <li key={p.day}>Day {p.day}: {p.focus} ({p.hours}h)</li>)}</ul>
+    </div>
+  );
+}
+
+6) Job Trends Analysis (fetch job data)
+// lib/jobs.js
+export async function fetchJobs({ q="javascript", limit=10 }={}){
+  // Replace with a real API; for now, mock consistent shape:
+  return Array.from({ length: limit }).map((_,i)=>({
+    id: i+1,
+    title: `${q.toUpperCase()} Developer`,
+    company: ["Acme","Globex","Initech"][i%3],
+    location: ["Remote","Bengaluru","Hyderabad"][i%3],
+    skills: ["JS","React","Node"].slice(0, (i%3)+1),
+  }));
+}
+
+export function skillCounts(jobs){
+  const map = new Map();
+  jobs.forEach(j => j.skills.forEach(s => map.set(s, (map.get(s)||0)+1)));
+  return [...map.entries()].sort((a,b)=> b[1]-a[1]);
+}
+
+// app/jobs/page.jsx
+"use client";
+import { useState } from "react";
+import { fetchJobs, skillCounts } from "@/lib/jobs";
+
+export default function Page(){
+  const [q, setQ] = useState("react");
+  const [jobs, setJobs] = useState([]);
+  const [skills, setSkills] = useState([]);
+
+  async function run(){
+    const data = await fetchJobs({ q, limit: 12 });
+    setJobs(data);
+    setSkills(skillCounts(data));
+  }
+
+  return (
+    <div style={{ display:"grid", gap:8 }}>
+      <h2>Job Trends</h2>
+      <input value={q} onChange={e=>setQ(e.target.value)} placeholder="keyword"/>
+      <button onClick={run}>Fetch</button>
+      <h3>Top Skills</h3>
+      <ul>{skills.map(([s,c])=> <li key={s}>{s}: {c}</li>)}</ul>
+      <h3>Jobs</h3>
+      <ul>{jobs.map(j=> <li key={j.id}>{j.title} @ {j.company} — {j.location}</li>)}</ul>
+    </div>
+  );
+}
+
+7) MCQ Mock Test with Timer
+// lib/quiz.js
+export const sampleQuestions = [
+  {
+    id: 1,
+    q: "Which array method returns a new array with elements that pass a test?",
+    options: ["map", "forEach", "filter", "reduce"],
+    answer: 2
+  },
+  {
+    id: 2,
+    q: "In JS, `this` inside an arrow function is…",
+    options: ["dynamic", "global", "lexically scoped", "undefined always"],
+    answer: 2
+  }
+];
+
+export function scoreQuiz(answers){ // {id: selectedIndex}
+  let correct = 0;
+  for (const { id, answer } of sampleQuestions){
+    if (answers[id] === answer) correct++;
+  }
+  return Math.round((correct / sampleQuestions.length) * 100);
+}
+
+// components/timer/Countdown.jsx
+"use client";
+import { useEffect, useState } from "react";
+export function Countdown({ seconds=60, onFinish }){
+  const [t, setT] = useState(seconds);
+  useEffect(()=>{
+    if (t <= 0){ onFinish?.(); return; }
+    const id = setInterval(()=> setT(x=> x-1), 1000);
+    return ()=> clearInterval(id);
+  }, [t, onFinish]);
+  return <div>Time Left: {t}s</div>;
+}
+
+// components/quiz/Quiz.jsx
+"use client";
+import { useState } from "react";
+import { sampleQuestions, scoreQuiz } from "@/lib/quiz";
+import { saveJSON } from "@/lib/storage";
+import { Countdown } from "@/components/timer/Countdown";
+
+export function Quiz(){
+  const [answers, setAnswers] = useState({});
+  const [done, setDone] = useState(false);
+  const [result, setResult] = useState(null);
+
+  function submit(){
+    const pct = scoreQuiz(answers);
+    setResult(pct);
+    setDone(true);
+    saveJSON("quiz_score", { pct, at: Date.now() });
+  }
+
+  return (
+    <div style={{ display:"grid", gap:8 }}>
+      <h2>MCQ Mock Test</h2>
+      {!done && <Countdown seconds={90} onFinish={submit} />}
+      {sampleQuestions.map(q=>(
+        <div key={q.id} style={{ padding:8, border:"1px solid #ddd", borderRadius:8 }}>
+          <p>{q.q}</p>
+          {q.options.map((opt, i)=>(
+            <label key={i} style={{ display:"block" }}>
+              <input
+                type="radio"
+                name={`q${q.id}`}
+                checked={answers[q.id]===i}
+                onChange={()=> setAnswers(a=> ({...a, [q.id]: i}))}
+              /> {opt}
+            </label>
+          ))}
+        </div>
+      ))}
+      <button onClick={submit} disabled={done}>Submit</button>
+      {result!=null && <p>Score: {result}%</p>}
+    </div>
+  );
+}
+
+// app/quiz/page.jsx
+import { Quiz } from "@/components/quiz/Quiz";
+export default function Page(){ return <Quiz/>; }
+
+8) AI Voice Interview (ask & record answers)
+// lib/interview.js
+export const QUESTIONS = [
+  "Tell me about a challenging bug you fixed recently.",
+  "How do you structure a scalable React app?",
+  "Explain event loop and microtasks."
+];
+
+// app/interview/page.jsx
+"use client";
+import { useEffect, useRef, useState } from "react";
+import { QUESTIONS } from "@/lib/interview";
+import { saveJSON, loadJSON } from "@/lib/storage";
+
+export default function Page(){
+  const [i, setI] = useState(0);
+  const [transcript, setTranscript] = useState(()=> loadJSON("interview_transcript", []));
+  const mediaRef = useRef(null);
+  const chunksRef = useRef([]);
+
+  function speak(text){
+    const u = new SpeechSynthesisUtterance(text);
+    speechSynthesis.speak(u);
+  }
+
+  async function startRec(){
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mr = new MediaRecorder(stream);
+    mediaRef.current = mr;
+    chunksRef.current = [];
+    mr.ondataavailable = (e)=> chunksRef.current.push(e.data);
+    mr.onstop = ()=>{
+      const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+      // Optionally upload blob to server here
+      // For transcript demo, store placeholder text:
+      const line = { q: QUESTIONS[i], a: "(audio recorded)", ts: Date.now() };
+      const updated = [...transcript, line];
+      setTranscript(updated);
+      saveJSON("interview_transcript", updated);
+    };
+    mr.start();
+  }
+
+  function stopRec(){ mediaRef.current?.stop(); }
+
+  function nextQ(){
+    setI(x=> Math.min(x+1, QUESTIONS.length-1));
+  }
+
+  useEffect(()=>{ speak(QUESTIONS[i]); }, [i]);
+
+  return (
+    <div style={{ display:"grid", gap:8 }}>
+      <h2>AI Voice Interview</h2>
+      <p>Q{ i+1 }/{ QUESTIONS.length }: {QUESTIONS[i]}</p>
+      <div style={{ display:"flex", gap:8 }}>
+        <button onClick={()=> speak(QUESTIONS[i])}>Ask Again</button>
+        <button onClick={startRec}>Start Answer</button>
+        <button onClick={stopRec}>Stop</button>
+        <button onClick={nextQ} disabled={i===QUESTIONS.length-1}>Next Question</button>
+      </div>
+      <h3>Transcript (placeholders)</h3>
+      <ul>
+        {transcript.map((t, idx)=> <li key={idx}><strong>Q:</strong> {t.q} <br/><strong>A:</strong> {t.a}</li>)}
+      </ul>
+    </div>
+  );
+}
+
+
+If you want auto-speech-to-text, you can add webkitSpeechRecognition to capture spoken text and push to transcript (browser support varies).
+
+9) Analysis Dashboard
+// app/dashboard/page.jsx
+"use client";
+import { useEffect, useState } from "react";
+import { loadJSON } from "@/lib/storage";
+import { computeCompleteness } from "@/lib/resume";
+
+export default function Page(){
+  const [resumePct, setResumePct] = useState(0);
+  const [quizScore, setQuizScore] = useState(null);
+  const [interview, setInterview] = useState([]);
+
+  useEffect(()=>{
+    const resume = loadJSON("resume_draft", null);
+    setResumePct(computeCompleteness(resume));
+    const qs = loadJSON("quiz_score", null);
+    setQuizScore(qs?.pct ?? null);
+    setInterview(loadJSON("interview_transcript", []));
+  }, []);
+
+  return (
+    <div style={{ display:"grid", gap:12 }}>
+      <h2>Analysis Dashboard</h2>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))", gap:12 }}>
+        <Card title="Resume completeness" value={`${resumePct}%`} />
+        <Card title="Quiz score" value={quizScore!=null ? `${quizScore}%` : "—"} />
+        <Card title="Interview answers" value={`${interview.length} responses`} />
+      </div>
+      <section>
+        <h3>Interview Transcript</h3>
+        <ul>{interview.map((t,i)=><li key={i}><strong>Q:</strong> {t.q}<br/><strong>A:</strong> {t.a}</li>)}</ul>
+      </section>
+    </div>
+  );
+}
+
+function Card({ title, value }){
+  return (
+    <div style={{ border:"1px solid #ddd", borderRadius:12, padding:12 }}>
+      <div style={{ color:"#555", fontSize:14 }}>{title}</div>
+      <div style={{ fontSize:28, fontWeight:600 }}>{value}</div>
+    </div>
+  );
+}
+
+What you’ve integrated (checklist)
+
+✅ Resume Builder with autosave & completeness %
+
+✅ AI Cover Letter (mock server route; swap with real API)
+
+✅ Study Planner (dummy generator)
+
+✅ Job Trends (mock fetch + skill frequency)
+
+✅ MCQ Quiz with timer & localStorage score
+
+✅ Voice Interview (speak questions, record answers)
+
+✅ Dashboard aggregating metrics
+
+Next steps (quick wins)
+
+Replace /api/ai with your actual LLM provider on the server route.
+
+Swap lib/jobs.js mock with a real job API (or your scraper backend).
+
+Add authentication if you want per-user persistence beyond localStorage.
+
+Store audio blobs to /api/upload and save transcript with a speech-to-text API.
